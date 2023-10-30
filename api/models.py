@@ -26,6 +26,7 @@ class BaseComment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     body = models.TextField(max_length=300)
     likes = models.IntegerField(validators=[MinValueValidator(0)])
+    time_posted = models.DateTimeField(auto_now_add=True, blank=True)
 
     class Meta:
         abstract = True
@@ -38,3 +39,40 @@ class Comment(BaseComment):
 
 class Reply(BaseComment):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="replies")
+
+
+class Notification(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+
+class ArticleCommentNotification(Notification):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    new_comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="article_notifications")
+
+    def __str__(self):
+        return f"{self.new_comment.user} commented on {self.article}"
+
+class ReplyCommentNotification(Notification):
+    source_comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    new_comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="comment_notifications")
+
+    def __str__(self):
+        return f"{self.new_comment.user} replied to your comment: {self.source_comment.body[:10]}"
+
+class ArticleLikeNotification(Notification):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Someone like your article: {self.article}"
+
+class CommentLikeNotification(Notification):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"Someone like your comment: {self.comment.body[:10]}"
+
+   
