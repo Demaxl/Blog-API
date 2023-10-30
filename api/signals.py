@@ -8,3 +8,4 @@ from django.db.models.signals import post_save
 def create_profile(sender, instance, created, *args, **kwargs):
     if created:
         Profile.objects.create(user=instance)
+
