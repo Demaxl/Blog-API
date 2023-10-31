@@ -11,6 +11,18 @@ class NotificationTestCase(TestCase):
             author=cls.author,
             title="A test title",
             body="This is a test article")
+        
+        cls.comment = Comment.objects.create(
+            article=cls.article,
+            user=cls.user,
+            body="A test comment"
+        )
+
+        cls.reply = Reply.objects.create(
+            comment=cls.comment,
+            user=cls.author,
+            body="A test reply"
+        )
     
     def testUserLikes(self):
         self.article.like(self.user)
@@ -19,4 +31,17 @@ class NotificationTestCase(TestCase):
 
         self.article.like(self.user)
         self.assertEqual(self.article.likes.count(), 1)
+
+    def testCommentLike(self):
+        self.comment.like(self.user)
+        
+        self.assertIn(self.user, self.comment.likes.all())
+
+        self.reply.like(self.user)
+        self.assertIn(self.user, self.reply.likes.all())
+
+
+
+
+
 
