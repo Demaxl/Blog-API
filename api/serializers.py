@@ -6,8 +6,22 @@ from .models import Article, Comment, Reply, Profile
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'date_joined')
+        read_only_fields = ('first_name', 'last_name', 'date_joined')
+
+class ProfileSerializer(serializers.ModelSerializer):
+    username = serializers.SlugRelatedField(slug_field="username", source="user", read_only=True)
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
+    email = serializers.EmailField(source="user.email", read_only=True)
+    date_joined = serializers.DateTimeField(source='user.date_joined', read_only=True)
+
+    class Meta:
         model = Profile
-        fields = ["user", "bio", "image"]
+        fields = ('username', 'first_name', 'last_name',"email", 'date_joined', 'bio', 'image')
+        read_only_fields = ('username', 'first_name', 'last_name', 'date_joined', 'bio', 'image')
+
 
 
 

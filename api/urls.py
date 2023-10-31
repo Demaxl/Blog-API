@@ -11,5 +11,6 @@ router = DefaultRouter(trailing_slash=False)
 router.register("articles", views.ArticleViewSet, basename="articles")
 
 urlpatterns = [
-    path("", include(router.urls))
+    path("", include(router.urls)),
+    path("author/<slug:username>", views.AuthorView.as_view())
 ]
