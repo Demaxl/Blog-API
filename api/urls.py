@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from . import views
 
 """
-/author/<user>
+/articles?author=demaxl
 
 """
 
