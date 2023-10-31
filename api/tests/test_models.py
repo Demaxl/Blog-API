@@ -1,7 +1,7 @@
 from api.models import *
 from django.test import TestCase
 
-class NotificationTestCase(TestCase):
+class ModelTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -40,6 +40,11 @@ class NotificationTestCase(TestCase):
         self.reply.like(self.user)
         self.assertIn(self.user, self.reply.likes.all())
 
+    def testCreateProfile(self):
+        user = User.objects.create_user(username="test", password="Characters12345!")
+        user.save()
+
+        self.assertEqual(Profile.objects.get(user=user).user, user)
 
 
 

@@ -1,11 +1,15 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from . import views
 
 """
-/articles
-/articles/1
+/author/<user>
 
 """
+
+router = DefaultRouter(trailing_slash=False)
+router.register("articles", views.ArticleViewSet, basename="articles")
 
 urlpatterns = [
-    
+    path("", include(router.urls))
 ]
