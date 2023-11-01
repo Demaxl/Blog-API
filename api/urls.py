@@ -3,8 +3,7 @@ from rest_framework.routers import DefaultRouter
 from . import views
 
 """
-/liked-articles
-/articles/liked-articles
+/articles/1/like
 
 """
 

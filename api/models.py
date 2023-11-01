@@ -28,8 +28,11 @@ class Article(models.Model):
 
     def like(self, user):
         if self.likes.contains(user):
-            return
-        self.likes.add(user)
+            self.likes.remove(user)
+            return "UNLIKED"
+        else:
+            self.likes.add(user)
+            return "LIKED"
         
 
 
@@ -46,8 +49,11 @@ class BaseComment(models.Model):
 
     def like(self, user):
         if self.likes.contains(user):
-            return
-        self.likes.add(user)
+            self.likes.remove(user)
+            return "UNLIKED"
+        else:
+            self.likes.add(user)
+            return "LIKED"
         
     
 

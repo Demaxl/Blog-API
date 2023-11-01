@@ -51,5 +51,12 @@ class ArticleViewSet(viewsets.ModelViewSet):
         
         serialized_items = ArticleSerializer(queryset, many=True)
         return Response(serialized_items.data)
+    
+    @action(detail=True, methods=["POST"], permission_classes=[IsAuthenticated])
+    def like(self, request, *args, **kwargs):
+        article = self.get_object()
+
+        msg = article.like(request.user)
+        return Response({"success":True, "Message":msg})
      
    
