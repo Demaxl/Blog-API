@@ -12,15 +12,27 @@ from .permissions import IsAuthorOrReadOnly
 
 
 class AuthorView(generics.RetrieveAPIView):
-    queryset = Profile.objects.all()
+    queryset = Profile.objects.select_related("user")
     serializer_class = ProfileSerializer
     lookup_field = "user__username"
     lookup_url_kwarg = "username"
 
 class ArticleViewSet(viewsets.ModelViewSet):
-    queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     permission_classes = [IsAuthorOrReadOnly]
+
+    search_fields = ["title"]
+    ordering_fields = ["time_posted"]
+
+
+    def get_queryset(self):
+        queryset = Article.objects.select_related("author")
+        author = self.request.query_params.get("author")
+
+        if author:
+            queryset = queryset.filter(author__username=author)
+
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
