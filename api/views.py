@@ -17,6 +17,14 @@ class AuthorView(generics.RetrieveAPIView):
     lookup_field = "user__username"
     lookup_url_kwarg = "username"
 
+class AuthorLikesView(generics.ListAPIView):
+    serializer_class = ArticleSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.request.user.liked_articles.all()
+    
+
 class ArticleViewSet(viewsets.ModelViewSet):
     serializer_class = ArticleSerializer
     permission_classes = [IsAuthorOrReadOnly]

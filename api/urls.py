@@ -3,7 +3,8 @@ from rest_framework.routers import DefaultRouter
 from . import views
 
 """
-/articles?author=demaxl
+/liked-articles
+/articles/liked-articles
 
 """
 
@@ -12,5 +13,6 @@ router.register("articles", views.ArticleViewSet, basename="articles")
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("author/<slug:username>", views.AuthorView.as_view())
+    path("author/<slug:username>", views.AuthorView.as_view()),
+    path("author/me/liked-articles", views.AuthorLikesView.as_view())
 ]
