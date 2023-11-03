@@ -6,9 +6,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
 
-from .serializers import ArticleSerializer, ProfileSerializer
+from .serializers import ArticleSerializer, ProfileSerializer, CommentSerializer
 from .models import Article, Comment, Reply, Profile
-from .permissions import IsAuthorOrReadOnly
+from .permissions import IsAuthorOrReadOnly, IsCommenterOrReadOnly
 
 
 class AuthorView(generics.RetrieveAPIView):
@@ -59,4 +59,23 @@ class ArticleViewSet(viewsets.ModelViewSet):
         msg = article.like(request.user)
         return Response({"success":True, "Message":msg})
      
-   
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [IsCommenterOrReadOnly]
+
+    def get_queryset(self):
+        queryset = Comment.objects.filter(article_id=self.kwargs['article_pk'])
+        return queryset
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user, article_id=self.kwargs['article_pk'])
+
+    @action(detail=True, methods=["POST"], permission_classes=[IsAuthenticated])
+    def like(self, request, *args, **kwargs):
+        comment = self.get_object()
+
+        msg = comment.like(request.user)
+        return Response({"success":True, "Message":msg})
+
+    

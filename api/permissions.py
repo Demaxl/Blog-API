@@ -10,3 +10,13 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
 
         # Instance must have an attribute named `author`.
         return obj.author == request.user
+
+class IsCommenterOrReadOnly(permissions.BasePermission):
+    message = "Only the commenter can edit this comment."
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        # Instance must have an attribute named `author`.
+        return obj.user == request.user
