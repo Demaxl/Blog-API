@@ -1,10 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
+from rest_framework import exceptions
+from functools import wraps
 
 from .serializers import ArticleSerializer, ProfileSerializer, CommentSerializer
 from .models import Article, Comment, Reply, Profile
@@ -63,13 +65,23 @@ class ArticleViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [IsCommenterOrReadOnly]
+   
+    def dispatch(self, request, *args, **kwargs):
+        article_id = kwargs.get('article_pk')
+
+        if article_id and not article_id.isdigit():
+            kwargs.update({"article_pk":-1})
+
+        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        queryset = Comment.objects.filter(article_id=self.kwargs['article_pk'])
+        article = get_object_or_404(Article, pk=self.kwargs['article_pk'])
+        queryset = Comment.objects.filter(article=article)
         return queryset
     
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user, article_id=self.kwargs['article_pk'])
+        article = get_object_or_404(Article, pk=self.kwargs['article_pk'])
+        serializer.save(user=self.request.user, article=article)
 
     @action(detail=True, methods=["POST"], permission_classes=[IsAuthenticated])
     def like(self, request, *args, **kwargs):

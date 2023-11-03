@@ -3,7 +3,7 @@ from rest_framework_nested import routers
 from . import views
 
 """
-/articles/1/comment
+/articles/1/comments/1/replies
 
 """
 
