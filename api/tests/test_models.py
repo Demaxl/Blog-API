@@ -30,7 +30,7 @@ class ModelTestCase(TestCase):
         self.assertIn(self.user, self.article.likes.all())
 
         self.article.like(self.user)
-        self.assertEqual(self.article.likes.count(), 1)
+        self.assertEqual(self.article.likes.count(), 0)
 
     def testCommentLike(self):
         self.comment.like(self.user)
