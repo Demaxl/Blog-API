@@ -13,10 +13,14 @@ article_router.register("articles", views.ArticleViewSet, basename="articles")
 comments_router = routers.NestedDefaultRouter(article_router, "articles", lookup="article")
 comments_router.register("comments", views.CommentViewSet, basename="article-comments")
 
+replies_router = routers.NestedDefaultRouter(comments_router, "comments", lookup="comment")
+replies_router.register("replies", views.ReplyViewSet, basename="comment-replies")
+
 
 urlpatterns = [
     path("", include(article_router.urls)),
     path("", include(comments_router.urls)),
+    path("", include(replies_router.urls)),
     path("author/<slug:username>", views.AuthorView.as_view()),
     path("author/me/liked-articles", views.AuthorLikesView.as_view())
 ]

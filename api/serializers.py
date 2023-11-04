@@ -60,3 +60,22 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def getRepliesCount(self, comment: Comment):
         return comment.replies.count()
+
+
+class ReplySerializer(serializers.ModelSerializer):
+    article_id = serializers.IntegerField(source="comment.article_id", read_only=True)
+    comment_id = serializers.IntegerField(source="comment.id", read_only=True)
+    reply_id = serializers.IntegerField(source="id", read_only=True)
+    user = serializers.SlugRelatedField(slug_field="username", read_only=True)
+
+    likes_count= serializers.SerializerMethodField("getLikes")
+
+
+    class Meta:
+        model = Reply
+        fields = ["article_id", "comment_id", "reply_id", "user", "body", "time_posted", "likes_count"]
+
+    def getLikes(self, reply: Reply):
+        return reply.likes.count()
+
+    

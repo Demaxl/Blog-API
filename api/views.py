@@ -1,3 +1,4 @@
+from typing import Any
 from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -8,7 +9,7 @@ from rest_framework import status
 from rest_framework import exceptions
 from functools import wraps
 
-from .serializers import ArticleSerializer, ProfileSerializer, CommentSerializer
+from .serializers import ArticleSerializer, ProfileSerializer, CommentSerializer, ReplySerializer
 from .models import Article, Comment, Reply, Profile
 from .permissions import IsAuthorOrReadOnly, IsCommenterOrReadOnly
 
@@ -63,16 +64,22 @@ class ArticleViewSet(viewsets.ModelViewSet):
 
 
 class BaseCommentViewSet(viewsets.ModelViewSet) :
-    permission_classes = [IsCommenterOrReadOnly]
+    ordering_fields = ["time_posted", "likes"]
+
+    def __init__(self, **kwargs: Any) -> None:
+        self.permission_classes = [IsCommenterOrReadOnly]
+        
+        super().__init__(**kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         article_id = kwargs.get('article_pk')
         comment_id = kwargs.get("comment_pk")
+        print(comment_id)
 
         if article_id and not article_id.isdigit():
             kwargs.update({"article_pk":-1})
 
-        if comment_id and not comment_id.isdigit:
+        if comment_id and not comment_id.isdigit():
             kwargs.update({"comment_pk":-1})
 
         return super().dispatch(request, *args, **kwargs)
@@ -84,13 +91,14 @@ class BaseCommentViewSet(viewsets.ModelViewSet) :
     
     def perform_create(self, serializer, parent, pk):
         parent_model = get_object_or_404(parent, pk=pk)
+        print(parent_model.body)
         serializer.save(user=self.request.user, **{parent.__name__.lower():parent_model})
 
     
 
 class CommentViewSet(BaseCommentViewSet):
     serializer_class = CommentSerializer
-   
+
 
     def get_queryset(self, *args, **kwargs):
         return super().get_queryset(
@@ -100,6 +108,29 @@ class CommentViewSet(BaseCommentViewSet):
     def perform_create(self, serializer, *args, **kwargs):
         return super().perform_create(
             serializer, Article, self.kwargs['article_pk']
+        )
+    
+    @action(detail=True, methods=["POST"], permission_classes=[IsAuthenticated])
+    def like(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        msg = instance.like(request.user)
+        return Response({"success":True, "Message":msg})
+
+    
+
+class ReplyViewSet(BaseCommentViewSet):
+    serializer_class = ReplySerializer
+   
+
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(
+            Comment, Reply, self.kwargs['comment_pk']
+            )
+    
+    def perform_create(self, serializer, *args, **kwargs):
+        return super().perform_create(
+            serializer, Comment, self.kwargs['comment_pk']
         )
     
     @action(detail=True, methods=["POST"], permission_classes=[IsAuthenticated])
